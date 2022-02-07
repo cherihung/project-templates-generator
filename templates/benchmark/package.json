@@ -1,0 +1,17 @@
+{
+  "name": "benchmark_test_suites",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": "true",
+  "scripts": {
+    "run-test": "node testRunner/index.js",
+    "show-result": "cd results && yarn start"
+  },
+  "author": "Cheri Hung cyh.io",
+  "license": "ISC",
+  "dependencies": {
+    "benchmark": "2.1.4",
+    "uuidv4": "6.2.0"
+  }
+}
