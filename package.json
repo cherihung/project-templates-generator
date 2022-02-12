@@ -7,7 +7,7 @@
     "start-watch": "tsc-watch -p src/tsconfig.json --onSuccess 'yarn start'",
     "build": "yarn clean && tsc --project src/tsconfig.json && yarn copy:templates",
     "clean": "rm -rf dist",
-    "copy:templates": "cp -r templates dist"
+    "copy:templates": "rsync -ax --exclude 'node_modules' templates dist"
   },
   "bin": {
     "generate": "./dist/index.js"
