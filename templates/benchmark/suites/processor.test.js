@@ -1,3 +1,4 @@
+/** EXAMPLE TEST SUITE **/
 const processItem = require('./setups').processItem;
 
 var globalQueue = [];
@@ -17,8 +18,6 @@ async function populateQueueEach(data) {
       const item = await processItem(d);
       globalQueue.push(item);
       currentCount = currentProgress.next().value;
-      //console.log(`Progress: ${currentCount}/${data.length} added to queue.`)
-      // logDB3.push(`Progress: ${currentCount}/${data.length} added to queue.`)
       return item;
      } catch(err) {
       console.error('error: ', err)
@@ -28,13 +27,7 @@ async function populateQueueEach(data) {
 
 async function mainWithProgressSeparate({names}) {
   await populateQueueEach(names);
-  // finally, output
-  //console.log(globalQueue.length)
 }
-
-// (async () => {
-//   await mainWithProgressSeparate()
-// })()
 
 module.exports = {
   executor: mainWithProgressSeparate,

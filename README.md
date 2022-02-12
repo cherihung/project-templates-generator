@@ -1,4 +1,4 @@
-# cli-generator
+# project generator
 
 ## Templates
 

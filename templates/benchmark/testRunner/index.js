@@ -4,7 +4,7 @@ const Benchmark = require('benchmark');
 const outputToJson = require('./outputHandler');
 const setUps = require('../suites/setups');
 
-const currentTitle = setUps.TEST_TITLE;
+const currentTitle = setUps.TEST_TITLE || 'my test';
 const suite = new Benchmark.Suite;
 
 // read files from /suites directory
@@ -16,7 +16,7 @@ fs.readdir(testDir, (err, files) => {
    throw Error(`fail to read directory ${testDir}`)
  }
  files.forEach((file) => {
-   if(/^suite\./.test(file)) {
+   if(/\.test\./.test(file)) {
       availableTests.push(path.join(testDir, file))
    }  
  })
@@ -30,7 +30,9 @@ function runTests(testPaths) {
     suite.add(currentTest.name, {
       fn: function() {
         // pass in any static test data to the executor
-        currentTest.executor(setUps.TEST_DATA);
+        if(setUps && setUps.TEST_DATA) {
+          currentTest.executor(setUps.TEST_DATA);
+        }
       },
       setup: function() {},
       teardown: function() {}
