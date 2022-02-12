@@ -1,0 +1,21 @@
+{
+  "name": "benchmark_test_suites",
+  "version": "1.0.0",
+  "description": "running benchmark tests locally",
+  "main": "index.js",
+  "private": "true",
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "scripts": {
+    "run-test": "node testRunner/index.js",
+    "run-viewer": "cd results && yarn start",
+    "install-runner": "yarn",
+    "install-viewer": "cd results && yarn"
+  },
+  "author": "Cheri Hung cyh.io",
+  "license": "ISC",
+  "dependencies": {
+    "benchmark": "2.1.4"
+  }
+}
