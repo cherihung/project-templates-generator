@@ -5,13 +5,14 @@
   "scripts": {
     "start": "node ./dist/index.js",
     "start-watch": "tsc-watch -p src/tsconfig.json --onSuccess 'yarn start'",
-    "build": "yarn clean && tsc --project src/tsconfig.json && yarn copy:templates",
+    "build-cli": "tsc --project src/tsconfig.json",
     "clean": "rm -rf dist",
-    "copy:templates": "rsync -ax --exclude 'node_modules' templates dist"
+    "copy:templates": "rsync -ax --exclude 'node_modules' templates dist",
+    "build": "yarn clean && yarn build-cli && yarn copy:templates"
   },
   "bin": {
     "generate": "./dist/index.js"
- },
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/inquirer": "^8.2.0",
@@ -20,6 +21,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "colors": "^1.4.0",
     "inquirer": "^8.2.0"
   }
 }

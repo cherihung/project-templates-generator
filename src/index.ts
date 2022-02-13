@@ -2,11 +2,12 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import colors from 'colors';
 import { answerOpts, createOpts } from './types';
 import inquirer from 'inquirer';
 
 const CHOICES = fs.readdirSync(path.join(__dirname, '..', 'templates'));
-const CURR_DIR = process.cwd();
+const DEST_DIR = process.cwd(); // where use invokes the CLI
 const BENCHMARK_CHOICES = ['runner only', 'runner and viewer'];
 const SKIP_FILES = ['node_modules', 'dist'];
 
@@ -31,7 +32,7 @@ const QUESTIONS = [
     type: 'input',
     message: 'Your Project name:',
     validate(input) {
-      const targetPath = path.join(CURR_DIR, input);
+      const targetPath = path.join(DEST_DIR, input);
       if(fs.existsSync(targetPath)) {
         return `Folder ${targetPath} already exists. Please use another name.`
       } else {
@@ -60,11 +61,11 @@ inquirer.prompt(QUESTIONS)
     }
     const {targetPath, templatePath, projectName, templateChoice, benchmarkType} = generateCreateOpts(answers);
     const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only' ;
-    console.log(`creating ${templateChoice}, type: ${benchmarkType}`)
+    console.log(colors.cyan(`created ${templateChoice}, type: ${benchmarkType}`))
     try {
       // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
       fs.mkdirSync(targetPath);
-      createDirectoryContents(templatePath, projectName, benchmarkRunnerOnly);
+      createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly);
     } catch(err) {
       throw err;
     }
@@ -72,7 +73,7 @@ inquirer.prompt(QUESTIONS)
   console.error(err)
 })
 
-function createDirectoryContents(templatePath: string, projectName: string, benchmarkRunnerOnly: boolean) {
+function createAndCopyTemplates(templatePath: string, projectName: string, benchmarkRunnerOnly: boolean) {
     const FILES_TO_SKIP = [...SKIP_FILES];
     // if benchmark type and only runner, add `results` to skip
     benchmarkRunnerOnly && FILES_TO_SKIP.push('results');
@@ -82,7 +83,7 @@ function createDirectoryContents(templatePath: string, projectName: string, benc
     filesToCreate.forEach(file => {
         const origFilePath = path.join(templatePath, file);
         
-        // get stats to determine if top level or sub directory
+        // determine if top level or sub directory
         const stats = fs.statSync(origFilePath);
     
         if (FILES_TO_SKIP.indexOf(file) > -1) return;
@@ -91,12 +92,12 @@ function createDirectoryContents(templatePath: string, projectName: string, benc
             // TODO: add option to use template engine in the future to transform any template files
             let contents = fs.readFileSync(origFilePath, 'utf8');
             // write file to destination folder
-            const writePath = path.join(CURR_DIR, projectName, file);
+            const writePath = path.join(DEST_DIR, projectName, file);
             fs.writeFileSync(writePath, contents, 'utf8');  
         } else if (stats.isDirectory()) {
             // create folder in destination folder; then copy files/folders recursively
-            fs.mkdirSync(path.join(CURR_DIR, projectName, file));
-            createDirectoryContents(path.join(templatePath, file), path.join(projectName, file), benchmarkRunnerOnly);
+            fs.mkdirSync(path.join(DEST_DIR, projectName, file));
+            createAndCopyTemplates(path.join(templatePath, file), path.join(projectName, file), benchmarkRunnerOnly);
         }
     });
 }
@@ -108,7 +109,7 @@ function generateCreateOpts(answers: answerOpts): createOpts {
   const benchmarkType = answers.benchmark_type === 'runner and viewer' ? 'full' : 'runner_only'
 
   const templatePath = path.join(__dirname, 'templates', templateChoice);
-  const targetPath = path.join(CURR_DIR, projectName);
+  const targetPath = path.join(DEST_DIR, projectName);
   const options: createOpts = {
     projectName,
     templatePath,

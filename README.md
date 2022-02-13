@@ -1,19 +1,16 @@
 # Project generator
 
-A generator to create a selected base for quick-start on projects.
+A generator to create a selected base for quick-start on projects. 
+
+CLI Inspired by https://github.com/pongsatt/mycli
 
 ## Templates
 
-- benchmark (runner only, runner and viewer) 
-  - see `templates/benchmark` for details
+- benchmark (runner only, runner and viewer) `templates/benchmark`
 
 ## Run
 
-This package is not currently published. To use it, check out this repo and then run the follow command to install the generator bin.
 ```
-npm install -g
-```
-Then you can use the generator by typing
-```
+npm install -g //npm link
 generate
 ```

@@ -25,9 +25,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const colors_1 = __importDefault(require("colors"));
 const inquirer_1 = __importDefault(require("inquirer"));
 const CHOICES = fs.readdirSync(path.join(__dirname, '..', 'templates'));
-const CURR_DIR = process.cwd();
+const DEST_DIR = process.cwd(); // where use invokes the CLI
 const BENCHMARK_CHOICES = ['runner only', 'runner and viewer'];
 const SKIP_FILES = ['node_modules', 'dist'];
 const QUESTIONS = [
@@ -51,7 +52,7 @@ const QUESTIONS = [
         type: 'input',
         message: 'Your Project name:',
         validate(input) {
-            const targetPath = path.join(CURR_DIR, input);
+            const targetPath = path.join(DEST_DIR, input);
             if (fs.existsSync(targetPath)) {
                 return `Folder ${targetPath} already exists. Please use another name.`;
             }
@@ -80,12 +81,11 @@ inquirer_1.default.prompt(QUESTIONS)
     }
     const { targetPath, templatePath, projectName, templateChoice, benchmarkType } = generateCreateOpts(answers);
     const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only';
-    console.log(`creating ${templateChoice}, type ${benchmarkType}`);
+    console.log(colors_1.default.cyan(`created ${templateChoice}, type: ${benchmarkType}`));
     try {
-        // create the user specified folder
+        // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
         fs.mkdirSync(targetPath);
-        // copy and transfer all template files minus SKIP_FILES
-        createDirectoryContents(templatePath, projectName, benchmarkRunnerOnly);
+        createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly);
     }
     catch (err) {
         throw err;
@@ -93,8 +93,7 @@ inquirer_1.default.prompt(QUESTIONS)
 }).catch((err) => {
     console.error(err);
 });
-// list of file/folder that should not be copied
-function createDirectoryContents(templatePath, projectName, benchmarkRunnerOnly) {
+function createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly) {
     const FILES_TO_SKIP = [...SKIP_FILES];
     // if benchmark type and only runner, add `results` to skip
     benchmarkRunnerOnly && FILES_TO_SKIP.push('results');
@@ -102,33 +101,31 @@ function createDirectoryContents(templatePath, projectName, benchmarkRunnerOnly)
     const filesToCreate = fs.readdirSync(templatePath);
     filesToCreate.forEach(file => {
         const origFilePath = path.join(templatePath, file);
-        // get stats about the current file
+        // determine if top level or sub directory
         const stats = fs.statSync(origFilePath);
         if (FILES_TO_SKIP.indexOf(file) > -1)
             return;
         if (stats.isFile()) {
-            // read file content and transform it using template engine
+            // TODO: add option to use template engine in the future to transform any template files
             let contents = fs.readFileSync(origFilePath, 'utf8');
-            if (file === '.npmignore')
-                file = '.gitignore';
             // write file to destination folder
-            const writePath = path.join(CURR_DIR, projectName, file);
+            const writePath = path.join(DEST_DIR, projectName, file);
             fs.writeFileSync(writePath, contents, 'utf8');
         }
         else if (stats.isDirectory()) {
-            // create folder in destination folder
-            fs.mkdirSync(path.join(CURR_DIR, projectName, file));
-            // copy files/folder inside current folder recursively
-            createDirectoryContents(path.join(templatePath, file), path.join(projectName, file), benchmarkRunnerOnly);
+            // create folder in destination folder; then copy files/folders recursively
+            fs.mkdirSync(path.join(DEST_DIR, projectName, file));
+            createAndCopyTemplates(path.join(templatePath, file), path.join(projectName, file), benchmarkRunnerOnly);
         }
     });
 }
+/** create the options to be used in generating the template project **/
 function generateCreateOpts(answers) {
     const templateChoice = answers.template;
     const projectName = answers.name;
     const benchmarkType = answers.benchmark_type === 'runner and viewer' ? 'full' : 'runner_only';
     const templatePath = path.join(__dirname, 'templates', templateChoice);
-    const targetPath = path.join(CURR_DIR, projectName);
+    const targetPath = path.join(DEST_DIR, projectName);
     const options = {
         projectName,
         templatePath,

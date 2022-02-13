@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const colors = require('colors');
 const Benchmark = require('benchmark');
 const outputToJson = require('./outputHandler');
 const setUps = require('../suites/setups');
@@ -40,7 +41,7 @@ function runTests(testPaths) {
   }
   // add listeners
   suite.on('cycle', function(event) {
-    console.log(String(event.target));
+    console.log(colors.cyan(String(event.target)));
   })
   .on('complete', function() {
     const dateNow = new Date().valueOf();
@@ -66,9 +67,9 @@ function runTests(testPaths) {
       })
     })
     outputToJson(output, (fileName) => {
-      console.log(`result file ${fileName} written`)
+      console.log(colors.underline(`result file ${fileName} written`))
     });
-    console.log('Fastest is ' + this.filter('fastest').map('name'));
+    console.log(colors.yellow('Fastest is ' + this.filter('fastest').map('name')));
   })
   // run async
   .run({ 'async': true });
