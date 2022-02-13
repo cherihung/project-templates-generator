@@ -53,26 +53,6 @@ const QUESTIONS = [
 }
 ];
 
-inquirer.prompt(QUESTIONS)
-  .then((answers: answerOpts) => {
-    if(!answers.proceed) {
-      console.log('ok, aborting....')
-      process.exit(1);
-    }
-    const {targetPath, templatePath, projectName, templateChoice, benchmarkType} = generateCreateOpts(answers);
-    const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only' ;
-    console.log(colors.cyan(`created ${templateChoice}, type: ${benchmarkType}`))
-    try {
-      // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
-      fs.mkdirSync(targetPath);
-      createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly);
-    } catch(err) {
-      throw err;
-    }
-}).catch((err) => {
-  console.error(err)
-})
-
 function createAndCopyTemplates(templatePath: string, projectName: string, benchmarkRunnerOnly: boolean) {
     const FILES_TO_SKIP = [...SKIP_FILES];
     // if benchmark type and only runner, add `results` to skip
@@ -118,4 +98,29 @@ function generateCreateOpts(answers: answerOpts): createOpts {
     benchmarkType
   }
   return options;
+}
+
+inquirer.prompt(QUESTIONS)
+.then((answers: answerOpts) => {
+  if(!answers.proceed) {
+    console.log('ok, aborting....')
+    process.exit(1);
+  }
+  const {targetPath, templatePath, projectName, templateChoice, benchmarkType} = generateCreateOpts(answers);
+  const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only' ;
+  console.log(colors.cyan(`created ${templateChoice}, type: ${benchmarkType}`))
+  try {
+    // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
+    fs.mkdirSync(targetPath);
+    createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly);
+  } catch(err) {
+    throw err;
+  }
+}).catch((err) => {
+  console.error(err)
+})  
+
+export {
+  createAndCopyTemplates,
+  generateCreateOpts
 }

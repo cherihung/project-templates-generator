@@ -73,26 +73,6 @@ const QUESTIONS = [
         },
     }
 ];
-inquirer_1.default.prompt(QUESTIONS)
-    .then((answers) => {
-    if (!answers.proceed) {
-        console.log('ok, aborting....');
-        process.exit(1);
-    }
-    const { targetPath, templatePath, projectName, templateChoice, benchmarkType } = generateCreateOpts(answers);
-    const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only';
-    console.log(colors_1.default.cyan(`created ${templateChoice}, type: ${benchmarkType}`));
-    try {
-        // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
-        fs.mkdirSync(targetPath);
-        createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly);
-    }
-    catch (err) {
-        throw err;
-    }
-}).catch((err) => {
-    console.error(err);
-});
 function createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly) {
     const FILES_TO_SKIP = [...SKIP_FILES];
     // if benchmark type and only runner, add `results` to skip
@@ -135,3 +115,28 @@ function generateCreateOpts(answers) {
     };
     return options;
 }
+function main() {
+    console.log(inquirer_1.default);
+    inquirer_1.default.prompt(QUESTIONS)
+        .then((answers) => {
+        if (!answers.proceed) {
+            console.log('ok, aborting....');
+            process.exit(1);
+        }
+        const { targetPath, templatePath, projectName, templateChoice, benchmarkType } = generateCreateOpts(answers);
+        const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only';
+        console.log(colors_1.default.cyan(`created ${templateChoice}, type: ${benchmarkType}`));
+        try {
+            // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
+            fs.mkdirSync(targetPath);
+            createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly);
+        }
+        catch (err) {
+            throw err;
+        }
+    }).catch((err) => {
+        console.error(err);
+    });
+}
+exports.default = main;
+main();
