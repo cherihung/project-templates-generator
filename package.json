@@ -11,7 +11,7 @@
     "build": "yarn clean && yarn build:cli && yarn copy:templates",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint ."
   },
   "bin": {
     "generate": "./dist/index.js"
