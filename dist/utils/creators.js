@@ -18,38 +18,41 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateCreateOpts = exports.createAndCopyTemplates = void 0;
 const fs = __importStar(require("fs"));
-const path_1 = __importDefault(require("path"));
+const path = __importStar(require("path"));
 const SKIP_FILES = ['node_modules', 'dist'];
-function createAndCopyTemplates(templatePath, projectName, benchmarkRunnerOnly, parentDir) {
+function createAndCopyTemplates({ templateChoice, templatePath, projectName, benchmarkType, }, { parentDir }) {
+    const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only';
     const DEST_DIR = parentDir;
     const FILES_TO_SKIP = [...SKIP_FILES];
     // if benchmark type and only runner, add `results` to skip
     benchmarkRunnerOnly && FILES_TO_SKIP.push('results');
     // read all first-level files/folders from template folder
     const filesToCreate = fs.readdirSync(templatePath);
-    filesToCreate.forEach(file => {
-        const origFilePath = path_1.default.join(templatePath, file);
+    filesToCreate.forEach((file) => {
+        const origFilePath = path.join(templatePath, file);
         // determine if top level or sub directory
         const stats = fs.statSync(origFilePath);
         if (FILES_TO_SKIP.indexOf(file) > -1)
             return;
         if (stats.isFile()) {
             // TODO: add option to use template engine in the future to transform any template files
-            let contents = fs.readFileSync(origFilePath, 'utf8');
+            const contents = fs.readFileSync(origFilePath, 'utf8');
             // write file to destination folder
-            const writePath = path_1.default.join(DEST_DIR, projectName, file);
+            const writePath = path.join(DEST_DIR, projectName, file);
             fs.writeFileSync(writePath, contents, 'utf8');
         }
         else if (stats.isDirectory()) {
             // create folder in destination folder; then copy files/folders recursively
-            fs.mkdirSync(path_1.default.join(DEST_DIR, projectName, file));
-            createAndCopyTemplates(path_1.default.join(templatePath, file), path_1.default.join(projectName, file), benchmarkRunnerOnly, DEST_DIR);
+            fs.mkdirSync(path.join(DEST_DIR, projectName, file));
+            createAndCopyTemplates({
+                templatePath: path.join(templatePath, file),
+                projectName: path.join(projectName, file),
+                templateChoice,
+                benchmarkType,
+            }, { parentDir: DEST_DIR });
         }
     });
 }
@@ -60,14 +63,14 @@ function generateCreateOpts(answers, parentDir) {
     const templateChoice = answers.template;
     const projectName = answers.name;
     const benchmarkType = answers.benchmark_type === 'runner and viewer' ? 'full' : 'runner_only';
-    const templatePath = path_1.default.join(DEST_DIR, 'templates', templateChoice);
-    const targetPath = path_1.default.join(DEST_DIR, projectName);
+    const templatePath = path.join(DEST_DIR, 'templates', templateChoice);
+    const targetPath = path.join(DEST_DIR, projectName);
     const options = {
         projectName,
         templatePath,
         targetPath,
         templateChoice,
-        benchmarkType
+        benchmarkType,
     };
     return options;
 }

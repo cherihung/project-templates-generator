@@ -17,6 +17,6 @@
   "license": "ISC",
   "dependencies": {
     "benchmark": "2.1.4",
-    "colors": "^1.4.0"
+    "colors": "1.4.0"
   }
 }

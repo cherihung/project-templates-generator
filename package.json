@@ -8,7 +8,7 @@
     "build:cli": "tsc --project src/tsconfig.json",
     "clean": "rm -rf dist",
     "copy:templates": "rsync -ax --exclude 'node_modules' templates dist",
-    "build": "yarn clean && yarn build-cli && yarn copy:templates",
+    "build": "yarn clean && yarn build:cli && yarn copy:templates",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts"

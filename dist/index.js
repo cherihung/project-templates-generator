@@ -24,19 +24,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
-const path_1 = __importDefault(require("path"));
+const path = __importStar(require("path"));
 const colors_1 = __importDefault(require("colors"));
 const creators_1 = require("./utils/creators");
-const inquirer = require('inquirer');
+const inquirer_1 = __importDefault(require("inquirer"));
 const DEST_DIR = process.cwd(); // where user invokes the CLI
 const BENCHMARK_CHOICES = ['runner only', 'runner and viewer'];
-const CHOICES = fs.readdirSync(path_1.default.join(__dirname, '..', 'templates'));
+const CHOICES = fs.readdirSync(path.join(__dirname, '..', 'templates'));
 const QUESTIONS = [
     {
         name: 'template',
         type: 'list',
         message: 'Which template would you like to generate?',
-        choices: CHOICES
+        choices: CHOICES,
     },
     {
         name: 'benchmark_type',
@@ -45,21 +45,21 @@ const QUESTIONS = [
         choices: BENCHMARK_CHOICES,
         when(answers) {
             return answers.template === 'benchmark';
-        }
+        },
     },
     {
         name: 'name',
         type: 'input',
         message: 'Your Project name:',
         validate(input) {
-            const targetPath = path_1.default.join(DEST_DIR, input);
+            const targetPath = path.join(DEST_DIR, input);
             if (fs.existsSync(targetPath)) {
                 return `Folder ${targetPath} already exists. Please use another name.`;
             }
             else {
                 return true;
             }
-        }
+        },
     },
     {
         name: 'proceed',
@@ -71,25 +71,21 @@ const QUESTIONS = [
         when(answers) {
             return answers.template && answers.name;
         },
-    }
+    },
 ];
-inquirer.prompt(QUESTIONS)
+inquirer_1.default
+    .prompt(QUESTIONS)
     .then((answers) => {
     if (!answers.proceed) {
         console.log('ok, aborting....');
         process.exit(1);
     }
-    const { targetPath, templatePath, projectName, templateChoice, benchmarkType } = (0, creators_1.generateCreateOpts)(answers, DEST_DIR);
-    const benchmarkRunnerOnly = templateChoice === 'benchmark' && benchmarkType === 'runner_only';
+    const { targetPath, templatePath, projectName, templateChoice, benchmarkType, } = (0, creators_1.generateCreateOpts)(answers, DEST_DIR);
     console.log(colors_1.default.cyan(`created ${templateChoice}, type: ${benchmarkType}`));
-    try {
-        // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
-        fs.mkdirSync(targetPath);
-        (0, creators_1.createAndCopyTemplates)(templatePath, projectName, benchmarkRunnerOnly, DEST_DIR);
-    }
-    catch (err) {
-        throw err;
-    }
-}).catch((err) => {
+    // create destination folder where the project will be copied to; then copy all files except the SKIP_FILES
+    fs.mkdirSync(targetPath);
+    (0, creators_1.createAndCopyTemplates)({ templatePath, projectName, templateChoice, benchmarkType }, { parentDir: DEST_DIR });
+})
+    .catch((err) => {
     console.error(err);
 });

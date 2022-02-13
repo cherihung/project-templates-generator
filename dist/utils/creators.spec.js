@@ -1,20 +1,41 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const creators_1 = require("./creators");
-const mock = require('mock-fs');
+const mock = require("mock-fs");
+const fs = require("fs");
 describe('cli function tests', () => {
+    const mock_target_path = 'my-project';
+    const opt1 = {
+        name: mock_target_path,
+        template: 'projectA',
+        proceed: true,
+        benchmark_type: 'runner and viewer',
+    };
+    const opt2 = {
+        name: 'my-project-two',
+        template: 'projectB',
+        proceed: true,
+        benchmark_type: 'runner only',
+    };
     beforeAll(() => {
         mock({
-            'parentDir': {
-                'templates': {
-                    'projectA': {
-                        'index.md': 'hello',
+            templates: {
+                projectA: {
+                    'projectA.md': 'hello',
+                    subFolder: {
+                        'document.md': 'hello document',
                     },
-                    'projectB': {
-                        'test.md': 'hello',
-                    }
+                    node_modules: {
+                        some_module: {
+                            'main.js': '1',
+                        },
+                    },
                 },
-            }
+                projectB: {
+                    'test.md': 'test file',
+                },
+            },
+            [mock_target_path]: {}, // pre-setup for ease of testing
         });
     });
     beforeEach(() => {
@@ -25,12 +46,34 @@ describe('cli function tests', () => {
         mock.restore();
     });
     it('generateCreateOpts(): should generate options for create based on user choice', () => {
-        const results = (0, creators_1.generateCreateOpts)({
-            name: 'my-project',
-            template: 'projectA',
-            proceed: true,
-            benchmark_type: 'runner and viewer'
-        }, 'parentDir');
-        console.log(results);
+        const parentDir = process.cwd();
+        expect((0, creators_1.generateCreateOpts)(opt1, parentDir)).toStrictEqual({
+            projectName: opt1.name,
+            templatePath: `${parentDir}/templates/${opt1.template}`,
+            targetPath: `${parentDir}/${opt1.name}`,
+            templateChoice: opt1.template,
+            benchmarkType: 'full',
+        });
+        expect((0, creators_1.generateCreateOpts)(opt2, parentDir)).toStrictEqual({
+            projectName: opt2.name,
+            templatePath: `${parentDir}/templates/${opt2.template}`,
+            targetPath: `${parentDir}/${opt2.name}`,
+            templateChoice: opt2.template,
+            benchmarkType: 'runner_only',
+        });
+    });
+    it('should copy target template to destination', () => {
+        const parentDir = process.cwd();
+        const { templatePath, projectName, templateChoice, benchmarkType } = (0, creators_1.generateCreateOpts)(opt1, parentDir);
+        (0, creators_1.createAndCopyTemplates)({
+            templatePath,
+            projectName,
+            templateChoice,
+            benchmarkType,
+        }, { parentDir });
+        const result = fs.readdirSync(parentDir + '/' + projectName);
+        // expect projectA copied over to newly created target directory
+        // without node_modules
+        expect(result).toEqual(['projectA.md', 'subFolder']);
     });
 });
