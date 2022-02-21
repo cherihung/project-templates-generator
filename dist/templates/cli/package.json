@@ -1,0 +1,33 @@
+{
+  "name": "my-cli",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "engines": {
+    "node": "^12.22.0 || ^14.17.0 || >=16.0.0"
+  },
+  "scripts": {
+    "start": "node ./src/index.js",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint ."
+  },
+  "bin": {
+    "generate": "./src/index.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.17.5",
+    "@babel/preset-env": "^7.16.11",
+    "babel-jest": "^27.5.1",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.5.1",
+    "mock-fs": "^5.1.2",
+    "prettier": "^2.5.1"
+  },
+  "dependencies": {
+    "colors": "1.4.0",
+    "inquirer": "^8.2.0"
+  }
+}
