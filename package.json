@@ -1,7 +1,10 @@
 {
   "name": "project-generator-cli",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "engines": {
+    "node": "^12.22.0 || ^14.17.0 || >=16.0.0"
+  },
   "scripts": {
     "start": "node ./dist/index.js",
     "start:watch": "tsc-watch -p src/tsconfig.json --onSuccess 'yarn start'",
