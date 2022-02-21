@@ -7,6 +7,7 @@ CLI Inspired by https://github.com/pongsatt/mycli
 ## Templates
 
 - benchmark (runner only, runner and viewer) `templates/benchmark`
+- CLI `templates/cli`
 
 ## Run
 
